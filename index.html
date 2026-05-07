@@ -40,7 +40,17 @@
       display: none;   /* hidden until store code entered */
       align-items: center;
       justify-content: center;
-      cursor: pointer; /* make it clear it's clickable */
+      cursor: pointer;
+      opacity: 0;      /* start transparent */
+    }
+    /* Fade-in animation */
+    .fadeIn {
+      display: flex !important;
+      animation: fadeInAnim 1s forwards;
+    }
+    @keyframes fadeInAnim {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     #prize {
       font-size: 22px;
@@ -94,9 +104,9 @@
       // Hide admin input
       document.getElementById("adminInput").style.display = "none";
 
-      // Show blue box with message
+      // Show blue box with fade-in
       const box = document.getElementById("blueBox");
-      box.style.display = "flex";
+      box.classList.add("fadeIn");
 
       // Store prize text
       document.getElementById("prize").innerText = prize;
@@ -113,7 +123,7 @@
       setTimeout(() => {
         box.style.display = "none";
         document.getElementById("prize").style.display = "block";
-        document.getElementById("resetBtn").style.display = "inline-block"; // show reset only now
+        document.getElementById("resetBtn").style.display = "inline-block";
       }, 1000);
     }
 
@@ -121,6 +131,7 @@
       // Reset UI
       document.getElementById("adminInput").style.display = "block";
       document.getElementById("storeCode").value = "";
+      document.getElementById("blueBox").classList.remove("fadeIn");
       document.getElementById("blueBox").style.opacity = 1;
       document.getElementById("blueBox").style.display = "none";
       document.getElementById("prize").style.display = "none";
