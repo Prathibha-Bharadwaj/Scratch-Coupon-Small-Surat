@@ -8,6 +8,7 @@
       text-align: center;
       padding: 40px;
       background: #f0f0f0;
+      overflow: hidden; /* keep confetti inside */
     }
     #storeCode {
       padding: 10px;
@@ -37,13 +38,12 @@
       color: white;
       font-size: 20px;
       font-weight: bold;
-      display: none;   /* hidden until store code entered */
+      display: none;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      opacity: 0;      /* start transparent */
+      opacity: 0;
     }
-    /* Fade-in animation */
     .fadeIn {
       display: flex !important;
       animation: fadeInAnim 1s forwards;
@@ -57,9 +57,18 @@
       font-weight: bold;
       color: #333;
       display: none;
+      opacity: 0;
     }
     #resetBtn {
       display: none;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -81,6 +90,9 @@
   <!-- Reset button -->
   <button id="resetBtn" onclick="resetGame()">Reset</button>
 
+  <!-- Confetti canvas -->
+  <canvas id="confetti"></canvas>
+
   <script>
     let prizeData = {};
 
@@ -101,41 +113,98 @@
       const code = document.getElementById("storeCode").value.trim();
       const prize = prizeData[code] || "Invalid Store Code";
 
-      // Hide admin input
       document.getElementById("adminInput").style.display = "none";
 
-      // Show blue box with fade-in
       const box = document.getElementById("blueBox");
       box.classList.add("fadeIn");
 
-      // Store prize text
-      document.getElementById("prize").innerText = prize;
+      const prizeDiv = document.getElementById("prize");
+      prizeDiv.innerText = prize;
 
-      // Make blue box clickable
       box.addEventListener("click", revealPrize, { once: true });
     }
 
     function revealPrize() {
       const box = document.getElementById("blueBox");
+      const prize = document.getElementById("prize");
+
+      // Fade out blue box
       box.style.transition = "opacity 1s";
       box.style.opacity = 0;
 
+      // Show prize simultaneously
+      prize.style.display = "block";
+      prize.style.transition = "opacity 1s";
+      prize.style.opacity = 1;
+
+      // Trigger confetti
+      startConfetti();
+
       setTimeout(() => {
         box.style.display = "none";
-        document.getElementById("prize").style.display = "block";
         document.getElementById("resetBtn").style.display = "inline-block";
       }, 1000);
     }
 
     function resetGame() {
-      // Reset UI
       document.getElementById("adminInput").style.display = "block";
       document.getElementById("storeCode").value = "";
-      document.getElementById("blueBox").classList.remove("fadeIn");
-      document.getElementById("blueBox").style.opacity = 1;
-      document.getElementById("blueBox").style.display = "none";
-      document.getElementById("prize").style.display = "none";
+      const box = document.getElementById("blueBox");
+      box.classList.remove("fadeIn");
+      box.style.opacity = 1;
+      box.style.display = "none";
+      const prize = document.getElementById("prize");
+      prize.style.display = "none";
+      prize.style.opacity = 0;
       document.getElementById("resetBtn").style.display = "none";
+      stopConfetti();
+    }
+
+    // Simple confetti animation
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    let confettiPieces = [];
+    let animationFrame;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function startConfetti() {
+      confettiPieces = Array.from({length: 150}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        r: Math.random() * 6 + 4,
+        d: Math.random() * 100 + 50,
+        color: `hsl(${Math.random() * 360},100%,50%)`,
+        tilt: Math.random() * 10 - 10
+      }));
+      animateConfetti();
+      setTimeout(stopConfetti, 3000); // stop after 3s
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiPieces.forEach(p => {
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2, true);
+        ctx.fill();
+        p.y += p.r/2;
+        if(p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+      animationFrame = requestAnimationFrame(animateConfetti);
+    }
+
+    function stopConfetti() {
+      cancelAnimationFrame(animationFrame);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   </script>
 </body>
