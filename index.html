@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scratch Coupon</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/websanova/wScratchPad/dist/wScratchPad.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #f9f9f9, #e0e0e0);
+      text-align: center;
+      padding: 40px;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    #adminInput {
+      margin-bottom: 20px;
+    }
+    #storeCode {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #aaa;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    #scratchpad {
+      width: 320px;
+      height: 200px;
+      margin: 0 auto;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, #ffd700, #ff8c00); /* shiny gold background */
+      position: relative;
+    }
+    #prize {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>Scratch Your Coupon!</h2>
+
+  <!-- Admin input -->
+  <div id="adminInput">
+    <input type="text" id="storeCode" placeholder="Enter Store Code">
+    <button onclick="setPrize()">Load Coupon</button>
+  </div>
+
+  <!-- Scratchpad -->
+  <div id="scratchpad" style="display:none;">
+    <div id="prize"></div>
+  </div>
+
+  <script>
+    let prizeData = {};
+
+    // Load prizes from Google Sheet CSV
+    async function loadPrizes() {
+      const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZvtRa9CPrLCEZHtvegDexXAfg9xEty9SxVrqrXam6PX7t0LhkADKaRcUyM4ko9M2AsZYchVE0qMZN/pub?output=csv");
+      const text = await response.text();
+      const rows = text.split("\n").map(r => r.split(","));
+      rows.forEach(row => {
+        const code = row[0].trim();
+        const prize = row[1]?.trim();
+        if(code && prize) prizeData[code] = prize;
+      });
+    }
+    loadPrizes();
+
+    function setPrize() {
+      const code = document.getElementById("storeCode").value.trim();
+      const prize = prizeData[code] || "Invalid Store Code";
+
+      // Hide admin input
+      document.getElementById("adminInput").style.display = "none";
+
+      // Show scratchpad
+      document.getElementById("scratchpad").style.display = "block";
+      document.getElementById("prize").style.display = "block";
+      document.getElementById("prize").innerText = prize;
+
+      // Initialize scratchpad with silver foil effect
+      $('#scratchpad').wScratchPad({
+        size: 40,
+        bg: 'transparent', // background shows shiny coupon
+        fg: 'silver',      // scratch layer looks like foil
+        cursor: 'crosshair',
+        scratchDown: function(e, percent){
+          if(percent > 50){
+            $('#scratchpad').wScratchPad('clear');
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
