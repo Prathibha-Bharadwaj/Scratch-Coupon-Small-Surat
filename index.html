@@ -132,7 +132,7 @@
       box.style.transition = "opacity 1s";
       box.style.opacity = 0;
 
-      // Show prize simultaneously
+      // Fade in prize simultaneously
       prize.style.display = "block";
       prize.style.transition = "opacity 1s";
       prize.style.opacity = 1;
@@ -160,7 +160,7 @@
       stopConfetti();
     }
 
-    // Simple confetti animation
+    // Confetti animation
     const canvas = document.getElementById("confetti");
     const ctx = canvas.getContext("2d");
     let confettiPieces = [];
@@ -178,9 +178,7 @@
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height - canvas.height,
         r: Math.random() * 6 + 4,
-        d: Math.random() * 100 + 50,
-        color: `hsl(${Math.random() * 360},100%,50%)`,
-        tilt: Math.random() * 10 - 10
+        color: `hsl(${Math.random() * 360},100%,50%)`
       }));
       animateConfetti();
       setTimeout(stopConfetti, 3000); // stop after 3s
