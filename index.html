@@ -30,7 +30,6 @@
       background: #005fa3;
     }
 
-    /* Container to overlap blue box and prize */
     #revealContainer {
       position: relative;
       width: 300px;
@@ -58,14 +57,24 @@
       color: white;
       cursor: pointer;
       display: none;
-      transition: opacity 3s ease, filter 3s ease;
     }
 
     #prize {
       background: #f0f0f0;
       color: #333;
       display: none;
-      transition: opacity 3s ease;
+    }
+
+    /* Dissolve animation for blue box */
+    @keyframes dissolveOut {
+      0% { opacity: 1; transform: scale(1); filter: blur(0px); }
+      100% { opacity: 0; transform: scale(2); filter: blur(20px); }
+    }
+
+    /* Pop animation for prize */
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     #resetBtn {
@@ -85,22 +94,17 @@
 <body>
   <h2>Prize Reveal Demo</h2>
 
-  <!-- Admin input -->
   <div id="adminInput">
     <input type="text" id="storeCode" placeholder="Enter Store Code">
     <button onclick="showBox()">Load Coupon</button>
   </div>
 
-  <!-- Reveal container -->
   <div id="revealContainer">
     <div id="blueBox">Scratch the box</div>
     <div id="prize"></div>
   </div>
 
-  <!-- Reset button -->
   <button id="resetBtn" onclick="resetGame()">Reset</button>
-
-  <!-- Confetti canvas -->
   <canvas id="confetti"></canvas>
 
   <script>
@@ -131,7 +135,6 @@
 
       box.style.display = "flex";
       box.style.opacity = 1;
-      box.style.filter = "blur(0px)";
 
       box.addEventListener("click", revealPrize, { once: true });
     }
@@ -142,14 +145,12 @@
 
       // Show prize in same position
       prize.style.display = "flex";
-      prize.style.opacity = 0;
 
-      // Dissolve box (fade + blur) over 3s
-      box.style.opacity = 0;
-      box.style.filter = "blur(20px)";
+      // Animate dissolve of blue box
+      box.style.animation = "dissolveOut 3s forwards";
 
-      // Fade in prize simultaneously
-      prize.style.opacity = 1;
+      // Animate prize pop-in simultaneously
+      prize.style.animation = "popIn 3s forwards";
 
       // Confetti
       startConfetti();
@@ -165,11 +166,12 @@
       document.getElementById("storeCode").value = "";
       const box = document.getElementById("blueBox");
       box.style.opacity = 1;
-      box.style.filter = "blur(0px)";
       box.style.display = "none";
+      box.style.animation = "";
       const prize = document.getElementById("prize");
       prize.style.display = "none";
       prize.style.opacity = 0;
+      prize.style.animation = "";
       document.getElementById("resetBtn").style.display = "none";
       stopConfetti();
     }
