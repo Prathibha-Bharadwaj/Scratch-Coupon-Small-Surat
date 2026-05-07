@@ -55,6 +55,16 @@
       color: #333;
       display: none;
     }
+    #scratchOverlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+      color: #555;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -69,6 +79,7 @@
   <!-- Scratchpad -->
   <div id="scratchpad" style="display:none;">
     <div id="prize"></div>
+    <div id="scratchOverlay">Scratch Here!</div>
   </div>
 
   <script>
@@ -108,6 +119,7 @@
         scratchDown: function(e, percent){
           if(percent > 50){
             $('#scratchpad').wScratchPad('clear');
+            document.getElementById("scratchOverlay").style.display = "none";
           }
         }
       });
