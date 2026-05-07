@@ -37,9 +37,10 @@
       color: white;
       font-size: 20px;
       font-weight: bold;
-      display: none;
+      display: none;   /* hidden until store code entered */
       align-items: center;
       justify-content: center;
+      cursor: pointer; /* make it clear it's clickable */
     }
     #prize {
       font-size: 22px;
@@ -100,8 +101,8 @@
       // Store prize text
       document.getElementById("prize").innerText = prize;
 
-      // Wait for user click anywhere
-      document.body.addEventListener("click", revealPrize, { once: true });
+      // Make blue box clickable
+      box.addEventListener("click", revealPrize, { once: true });
     }
 
     function revealPrize() {
