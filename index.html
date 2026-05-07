@@ -23,6 +23,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      margin: 10px;
     }
     button:hover {
       background: #005fa3;
@@ -46,6 +47,9 @@
       color: #333;
       display: none;
     }
+    #resetBtn {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -62,6 +66,9 @@
 
   <!-- Prize -->
   <div id="prize"></div>
+
+  <!-- Reset button -->
+  <button id="resetBtn" onclick="resetGame()">Reset</button>
 
   <script>
     let prizeData = {};
@@ -86,8 +93,9 @@
       // Hide admin input
       document.getElementById("adminInput").style.display = "none";
 
-      // Show blue box
-      document.getElementById("blueBox").style.display = "flex";
+      // Show blue box with message
+      const box = document.getElementById("blueBox");
+      box.style.display = "flex";
 
       // Store prize text
       document.getElementById("prize").innerText = prize;
@@ -104,7 +112,18 @@
       setTimeout(() => {
         box.style.display = "none";
         document.getElementById("prize").style.display = "block";
+        document.getElementById("resetBtn").style.display = "inline-block"; // show reset only now
       }, 1000);
+    }
+
+    function resetGame() {
+      // Reset UI
+      document.getElementById("adminInput").style.display = "block";
+      document.getElementById("storeCode").value = "";
+      document.getElementById("blueBox").style.opacity = 1;
+      document.getElementById("blueBox").style.display = "none";
+      document.getElementById("prize").style.display = "none";
+      document.getElementById("resetBtn").style.display = "none";
     }
   </script>
 </body>
