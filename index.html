@@ -51,7 +51,6 @@
       font-size: 22px;
       font-weight: bold;
       opacity: 0;
-      transition: opacity 1s ease;
     }
 
     #blueBox {
@@ -59,12 +58,14 @@
       color: white;
       cursor: pointer;
       display: none;
+      transition: opacity 3s ease, filter 3s ease;
     }
 
     #prize {
       background: #f0f0f0;
       color: #333;
       display: none;
+      transition: opacity 3s ease;
     }
 
     #resetBtn {
@@ -130,6 +131,7 @@
 
       box.style.display = "flex";
       box.style.opacity = 1;
+      box.style.filter = "blur(0px)";
 
       box.addEventListener("click", revealPrize, { once: true });
     }
@@ -142,8 +144,11 @@
       prize.style.display = "flex";
       prize.style.opacity = 0;
 
-      // Cross-fade
+      // Dissolve box (fade + blur) over 3s
       box.style.opacity = 0;
+      box.style.filter = "blur(20px)";
+
+      // Fade in prize simultaneously
       prize.style.opacity = 1;
 
       // Confetti
@@ -152,7 +157,7 @@
       setTimeout(() => {
         box.style.display = "none";
         document.getElementById("resetBtn").style.display = "inline-block";
-      }, 1000);
+      }, 3000);
     }
 
     function resetGame() {
@@ -160,6 +165,7 @@
       document.getElementById("storeCode").value = "";
       const box = document.getElementById("blueBox");
       box.style.opacity = 1;
+      box.style.filter = "blur(0px)";
       box.style.display = "none";
       const prize = document.getElementById("prize");
       prize.style.display = "none";
