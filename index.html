@@ -1,126 +1,492 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Scratch Coupon</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/websanova/wScratchPad/dist/wScratchPad.min.js"></script>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #f9f9f9, #e0e0e0);
-      text-align: center;
-      padding: 40px;
-    }
-    h2 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-    #adminInput {
-      margin-bottom: 20px;
-    }
-    #storeCode {
-      padding: 10px;
-      font-size: 16px;
-      border: 2px solid #aaa;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #0078d7;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-    #scratchContainer {
-      width: 320px;
-      height: 200px;
-      margin: 0 auto;
-      position: relative;
-    }
-    #prize {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #ffd700, #ff8c00); /* shiny gold background */
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: bold;
-      color: #333;
-    }
-    #scratchpad {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 15px;
-      overflow: hidden;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch Card Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Scratch Your Coupon!</h2>
+    <div id="admin-panel">
+        <h1>Admin Entry</h1>
+        <label for="storeCodeInput">Enter Store Code:</label>
+        <input type="text" id="storeCodeInput" placeholder="e.g., STORE001" autocomplete="off">
+        <button id="generateScratchCardBtn">Generate Scratch Card</button>
+        <p id="adminMessage" class="message"></p>
+    </div>
 
-  <!-- Admin input -->
-  <div id="adminInput">
-    <input type="text" id="storeCode" placeholder="Enter Store Code">
-    <button onclick="setPrize()">Load Coupon</button>
-  </div>
+    <div id="scratch-card-container" style="display: none;">
+        <h2>Your Scratch Card!</h2>
+        <div id="scratch-area">
+            <!-- Canvas will be injected here by JavaScript -->
+        </div>
+        <p id="scratchInstructions">Scratch to reveal your prize!</p>
+        <div id="prize-reveal" style="display: none;">
+            <h3>Congratulations! You won:</h3>
+            <p id="prizeText"></p>
+        </div>
+        <button id="resetButton" style="display: none;">Scratch Another</button>
+    </div>
 
-  <!-- Scratch container -->
-  <div id="scratchContainer" style="display:none;">
-    <div id="prize"></div>
-    <div id="scratchpad"></div>
-  </div>
-
-  <script>
-    let prizeData = {};
-
-    // Load prizes from Google Sheet CSV
-    async function loadPrizes() {
-      const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZvtRa9CPrLCEZHtvegDexXAfg9xEty9SxVrqrXam6PX7t0LhkADKaRcUyM4ko9M2AsZYchVE0qMZN/pub?output=csv");
-      const text = await response.text();
-      const rows = text.split("\n").map(r => r.split(","));
-      rows.forEach(row => {
-        const code = row[0].trim();
-        const prize = row[1]?.trim();
-        if(code && prize) prizeData[code] = prize;
-      });
-    }
-    loadPrizes();
-
-    function setPrize() {
-      const code = document.getElementById("storeCode").value.trim();
-      const prize = prizeData[code] || "Invalid Store Code";
-
-      // Hide admin input
-      document.getElementById("adminInput").style.display = "none";
-
-      // Show scratch container
-      document.getElementById("scratchContainer").style.display = "block";
-      document.getElementById("prize").innerText = prize;
-
-      // Initialize scratchpad overlay
-      $('#scratchpad').wScratchPad({
-        size: 40,
-        bg: '#ffd700',     // gold background behind foil
-        fg: '#C0C0C0',     // silver foil scratch layer
-        cursor: 'crosshair',
-        scratchMove: function(e, percent){
-          if(percent > 50){
-            $('#scratchpad').wScratchPad('clear');
-          }
-        }
-      });
-    }
-  </script>
+    <script src="script.js"></script>
 </body>
 </html>
+
+2. style.css
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f4f8, #e0e7ee);
+    margin: 0;
+    color: #333;
+}
+
+#admin-panel, #scratch-card-container {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid #ddd;
+    min-width: 350px;
+    max-width: 90%;
+}
+
+h1, h2, h3 {
+    color: #2c3e50;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"] {
+    padding: 12px 15px;
+    margin: 10px 0 20px;
+    border: 1px solid #aeb6bf;
+    border-radius: 6px;
+    width: calc(100% - 30px);
+    font-size: 1em;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.message {
+    color: #e74c3c;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+#scratch-area {
+    position: relative; /* For canvas positioning */
+    width: 320px; /* Adjust as needed */
+    height: 180px; /* Adjust as needed */
+    background: linear-gradient(135deg, #a4b0be 0%, #c8d6e5 20%, #7f8fa6 50%, #c8d6e5 80%, #a4b0be 100%);
+    border: 3px solid #57606f;
+    border-radius: 15px;
+    margin: 25px auto;
+    overflow: hidden; /* Important for canvas overlay */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.5);
+    cursor: grab;
+    user-select: none; /* Prevent text selection */
+}
+
+#scratch-area.scratched {
+    cursor: auto; /* Change cursor after scratching */
+}
+
+#scratch-area canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none; /* Prevent default touch actions like scrolling */
+}
+
+#scratchInstructions {
+    font-style: italic;
+    color: #666;
+    margin-top: 10px;
+}
+
+#prize-reveal {
+    margin-top: 25px;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #28a745; /* Success color */
+    background-color: #e6ffed;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #28a745;
+}
+
+#prize-reveal h3 {
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+#prizeText {
+    color: #333;
+    font-size: 1.1em;
+}
+
+#resetButton {
+    margin-top: 20px;
+    background-color: #6c757d; /* Grey for reset */
+}
+#resetButton:hover {
+    background-color: #5a6268;
+}
+
+3. script.js
+
+// --- DOM Elements ---
+const adminPanel = document.getElementById('admin-panel');
+const storeCodeInput = document.getElementById('storeCodeInput');
+const generateScratchCardBtn = document.getElementById('generateScratchCardBtn');
+const adminMessage = document.getElementById('adminMessage');
+
+const scratchCardContainer = document.getElementById('scratch-card-container');
+const scratchArea = document.getElementById('scratch-area');
+const scratchInstructions = document.getElementById('scratchInstructions');
+const prizeReveal = document.getElementById('prize-reveal');
+const prizeText = document.getElementById('prizeText');
+const resetButton = document.getElementById('resetButton');
+
+// --- Global Variables ---
+let currentStoreCode = '';
+// !!! IMPORTANT: This URL is exposed client-side. NOT SECURE for sensitive prize data. !!!
+const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZvtRa9CPrLCEZHtvegDexXAfg9xEty9SxVrqrXam6PX7t0LhkADKaRcUyM4ko9M2AsZYchVE0qMZN/pub?output=csv";
+let prizeData = []; // To store parsed data from Google Sheet
+let canvas; // The canvas element for scratching
+let ctx;    // The 2D rendering context
+let isScratching = false;
+let scratchCompleted = false;
+
+// --- Functions ---
+
+/**
+ * Fetches and parses the Google Sheet CSV data.
+ */
+async function fetchGoogleSheetData() {
+    adminMessage.textContent = 'Loading prize data...';
+    try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const csvText = await response.text();
+        prizeData = parseCSV(csvText);
+        console.log("Google Sheet data loaded:", prizeData);
+        adminMessage.textContent = ''; // Clear loading message
+    } catch (error) {
+        console.error("Error fetching Google Sheet data:", error);
+        adminMessage.textContent = `Error loading prize data: ${error.message}. Please check the sheet URL and internet connection.`;
+        generateScratchCardBtn.disabled = true; // Disable if data can't be loaded
+    }
+}
+
+/**
+ * Simple CSV parser.
+ * Assumes first row is headers.
+ * @param {string} csvString
+ * @returns {Array<Object>} Array of objects, each representing a row.
+ */
+function parseCSV(csvString) {
+    const lines = csvString.trim().split('\n');
+    if (lines.length === 0) return [];
+
+    // Replace problematic header names for easier JS object access
+    const rawHeaders = lines[0].split(',').map(header => header.trim());
+    const headers = rawHeaders.map(h => {
+        // Simple sanitization: lowercase, replace spaces/special chars with underscore
+        return h.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    });
+
+    const data = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(','); // Basic split, might fail on commas within data
+        if (values.length !== headers.length) {
+            console.warn(`Skipping row ${i+1} due to column mismatch.`);
+            continue;
+        }
+        const row = {};
+        headers.forEach((header, index) => {
+            row[header] = values[index] ? values[index].trim() : '';
+        });
+        data.push(row);
+    }
+    return data;
+}
+
+/**
+ * Simulates a VLOOKUP on the fetched prizeData.
+ * Looks for the store_code in the relevant column.
+ * @param {string} storeCode
+ * @returns {string} The prize string or a default message if not found.
+ */
+function getPrizeFromSheet(storeCode) {
+    if (prizeData.length === 0) {
+        return "Prize data not available.";
+    }
+
+    // Based on your Google Sheet (Column B for store code, Column C for prize)
+    // The `parseCSV` function converts headers to lowercase with underscores.
+    // So, 'Column B' becomes 'column_b', 'Column C' becomes 'column_c'.
+    // Adjust these column names if your actual Google Sheet headers are different.
+    const foundRow = prizeData.find(row => row['column_b'] === storeCode);
+
+    return foundRow ? foundRow['column_c'] : "Sorry, no prize found for this code.";
+}
+
+
+/**
+ * Initializes the scratch card canvas.
+ */
+function initializeScratchCard() {
+    scratchArea.innerHTML = ''; // Clear any existing canvas
+    scratchArea.classList.remove('scratched'); // Reset cursor
+
+    canvas = document.createElement('canvas');
+    canvas.width = scratchArea.offsetWidth;
+    canvas.height = scratchArea.offsetHeight;
+    ctx = canvas.getContext('2d');
+    scratchArea.appendChild(canvas);
+
+    // Initial overlay color (what the user scratches off)
+    ctx.fillStyle = '#888';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Text to appear on the unscratched surface
+    ctx.font = '24px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Scratch Here!', canvas.width / 2, canvas.height / 2);
+
+    // Set up drawing styles for scratching
+    ctx.globalCompositeOperation = 'destination-out'; // This makes drawn paths erase pixels
+    ctx.lineWidth = 35; // Width of the scratch "tool"
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    scratchCompleted = false; // Reset scratch completion status
+    setupCanvasListeners();
+}
+
+/**
+ * Helper to get mouse/touch position relative to canvas.
+ * @param {HTMLCanvasElement} canvasElement
+ * @param {MouseEvent|TouchEvent} evt
+ */
+function getCanvasPos(canvasElement, evt) {
+    const rect = canvasElement.getBoundingClientRect();
+    let clientX, clientY;
+
+    if (evt.touches && evt.touches.length > 0) {
+        clientX = evt.touches[0].clientX;
+        clientY = evt.touches[0].clientY;
+    } else {
+        clientX = evt.clientX;
+        clientY = evt.clientY;
+    }
+
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+/**
+ * Sets up event listeners for scratching.
+ */
+function setupCanvasListeners() {
+    canvas.addEventListener('mousedown', startScratching);
+    canvas.addEventListener('mousemove', scratchMove);
+    canvas.addEventListener('mouseup', stopScratching);
+    canvas.addEventListener('mouseleave', stopScratching); // Stop if mouse leaves canvas
+
+    canvas.addEventListener('touchstart', startScratching, { passive: false });
+    canvas.addEventListener('touchmove', scratchMove, { passive: false });
+    canvas.addEventListener('touchend', stopScratching);
+    canvas.addEventListener('touchcancel', stopScratching);
+}
+
+/**
+ * Removes event listeners from the canvas.
+ */
+function removeCanvasListeners() {
+    canvas.removeEventListener('mousedown', startScratching);
+    canvas.removeEventListener('mousemove', scratchMove);
+    canvas.removeEventListener('mouseup', stopScratching);
+    canvas.removeEventListener('mouseleave', stopScratching);
+
+    canvas.removeEventListener('touchstart', startScratching);
+    canvas.removeEventListener('touchmove', scratchMove);
+    canvas.removeEventListener('touchend', stopScratching);
+    canvas.removeEventListener('touchcancel', stopScratching);
+}
+
+function startScratching(e) {
+    if (scratchCompleted) return;
+    e.preventDefault(); // Prevent default browser actions for touch
+    isScratching = true;
+    const pos = getCanvasPos(canvas, e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+}
+
+function scratchMove(e) {
+    if (!isScratching || scratchCompleted) return;
+    e.preventDefault(); // Prevent default browser actions for touch
+    const pos = getCanvasPos(canvas, e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    checkScratchCompletion();
+}
+
+function stopScratching() {
+    isScratching = false;
+    ctx.closePath();
+    if (!scratchCompleted) { // Re-check on stop, in case the last move completed it
+        checkScratchCompletion();
+    }
+}
+
+/**
+ * Checks how much of the scratch card has been revealed.
+ */
+function checkScratchCompletion() {
+    if (scratchCompleted) return;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixelData = imageData.data;
+    let transparentPixels = 0;
+
+    // Iterate through pixel data, checking alpha channel (every 4th value)
+    for (let i = 3; i < pixelData.length; i += 4) {
+        if (pixelData[i] === 0) { // Fully transparent
+            transparentPixels++;
+        }
+    }
+
+    const totalPixels = (canvas.width * canvas.height);
+    const scratchPercentage = (transparentPixels / totalPixels) * 100;
+
+    const COMPLETION_THRESHOLD = 60; // Percentage of pixels that need to be transparent
+    if (scratchPercentage > COMPLETION_THRESHOLD) {
+        scratchCompleted = true;
+        removeCanvasListeners(); // Stop further scratching
+        scratchArea.classList.add('scratched'); // Change cursor
+        revealPrize(currentStoreCode);
+    }
+}
+
+/**
+ * Reveals the prize based on the store code.
+ * @param {string} storeCode
+ */
+function revealPrize(storeCode) {
+    scratchInstructions.style.display = 'none';
+    const prize = getPrizeFromSheet(storeCode);
+    prizeText.textContent = prize;
+    prizeReveal.style.display = 'block';
+    resetButton.style.display = 'block'; // Show reset button after prize is revealed
+    console.log(`Prize for ${storeCode}: ${prize}`);
+
+    // Optionally make the canvas fully transparent if prize is revealed
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-over'; // Reset blend mode for any potential future draws
+}
+
+/**
+ * Resets the application to the admin input state.
+ */
+function resetApp() {
+    adminPanel.style.display = 'block';
+    scratchCardContainer.style.display = 'none';
+    storeCodeInput.value = '';
+    adminMessage.textContent = '';
+    prizeReveal.style.display = 'none';
+    resetButton.style.display = 'none';
+    scratchInstructions.style.display = 'block';
+    scratchCompleted = false; // Reset flag
+    isScratching = false; // Reset flag
+    currentStoreCode = '';
+    if (canvas) { // Clear canvas if it exists
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        removeCanvasListeners(); // Ensure listeners are cleaned up
+    }
+}
+
+
+// --- Event Listeners ---
+generateScratchCardBtn.addEventListener('click', () => {
+    const inputCode = storeCodeInput.value.trim();
+    if (!inputCode) {
+        adminMessage.textContent = 'Please enter a store code.';
+        return;
+    }
+    if (prizeData.length === 0) {
+        adminMessage.textContent = 'Prize data not loaded yet. Please wait or check connection.';
+        return;
+    }
+
+    // Admin input vanishes
+    storeCodeInput.value = '';
+    adminMessage.textContent = ''; // Clear previous messages
+
+    currentStoreCode = inputCode;
+    adminPanel.style.display = 'none';
+    scratchCardContainer.style.display = 'block';
+    prizeReveal.style.display = 'none'; // Hide previous prize if any
+    scratchInstructions.style.display = 'block';
+
+    initializeScratchCard(); // Start the scratch card
+});
+
+resetButton.addEventListener('click', resetApp);
+
+
+// --- Initial Load ---
+fetchGoogleSheetData(); // Load Google Sheet data on page load
