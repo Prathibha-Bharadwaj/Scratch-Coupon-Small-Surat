@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Get Item at Rs 1!</title>
+  <title>Prize Reveal</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -100,7 +100,7 @@
   </div>
 
   <div id="revealContainer">
-    <div id="blueBox">Click to Reveal your Gift Item</div>
+    <div id="blueBox">Scratch the box</div>
     <div id="prize"></div>
   </div>
 
@@ -114,15 +114,18 @@
       const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSZvtRa9CPrLCEZHtvegDexXAfg9xEty9SxVrqrXam6PX7t0LhkADKaRcUyM4ko9M2AsZYchVE0qMZN/pub?output=csv");
       const text = await response.text();
       const rows = text.split("\n").map(r => r.split(","));
+      prizeData = {}; // clear old data
       rows.forEach(row => {
         const code = row[0].trim();
         const prize = row[1]?.trim();
         if(code && prize) prizeData[code] = prize;
       });
     }
-    loadPrizes();
 
-    function showBox() {
+    async function showBox() {
+      // Always refresh Google Sheet before showing box
+      await loadPrizes();
+
       const code = document.getElementById("storeCode").value.trim();
       const prize = prizeData[code] || "Invalid Store Code";
 
